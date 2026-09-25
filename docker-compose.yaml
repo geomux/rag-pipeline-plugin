@@ -1,0 +1,20 @@
+# docker-compose.yaml
+# Docker compose module that runs PostgreSQL database (with pgvector plugin) inside of a Docker container
+
+services:
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: postgres_container
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  volumes:
+    postgres_data:
