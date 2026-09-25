@@ -1,0 +1,14 @@
+# config.toml
+
+# ====================================
+# RAG Pipeline Plugin Configuration
+# ====================================
+
+[retrieval]
+# Top-K: Number of similar chunks to retrieve for each user prompt
+top_k = 5
+
+[embedding]
+# Ollama embedding model name
+# Change this to the desired Ollama embedding model, manifest must already be pulled locally
+model = "nomic-embed-text"

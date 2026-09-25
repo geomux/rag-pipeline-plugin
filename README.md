@@ -2,21 +2,22 @@
 
 # *WORK IN PROGRESS* **Repo is not currently operational (see project status)**
 
-Retrieval Augmented Generation (RAG) data pipeline for injesting documentation and serving context to an AI agent.
+Retrieval Augmented Generation (RAG) data pipeline for ingesting documentation and serving context to an AI agent.
 
-Injest documentation with pgvector/pgvector-scale, retrieve chunks with aligned embedding vectors to the user prompt, inject them into the agent harness when calling the model. 
+Ingest documentation with pgvector/pgvector-scale, retrieve chunks with aligned embedding vectors to the user prompt, inject them into the agent harness when calling the model. 
 
 Once integrated into your agent harness, every user prompt that calls a model will use RAG.
 
 
 **embedding is completed with a local Ollama run embedding model**
 
-```
-docs/* --[injested, chunked, embedded]--> PostgresSQL (pgvector)
-
-user prompt --[embed prompt, retrieve top-k vectors]--> agumented prompt 
-
-augmented prompt --[harness client]--> model
+```mermaid
+flowchart LR
+  D["docs/"] -->|"cli.py ingest: load, chunk, embed"| O["Ollama on host<br/>nomic-embed-text"]
+  O -->|"768-dimension vectors"| P[("postgres + pgvector<br/>doc_chunks")]
+  U["user prompt"] -->|"cli.py serve: middleware"| O
+  P -->|"top-k cosine"| A["augmented prompt"]
+  A -->|"harness adapter: omp / claude_code / custom"| M["model"]
 ```
 
 
@@ -34,13 +35,18 @@ ollama pull nomic-embed-text
 git clone https://github.com/geomux/rag-pipeline-plugin
 cd rag-pipeline-plugin
 ```
+Move the example .env file to a functional .env.
+```bash
+cp .env.example .env
+```
+Change the password value in the new .env to your real database access password.
+
 
 Copy your documents into docs/ directory.
 
 
 
 ## User Guide | Configuration
-
 
 
 
@@ -88,30 +94,30 @@ create index on doc_chunks using ivfflat (embedding vector_cosine_ops)
 | Root                 | Purpose                                                              |
 | -------------------- | -------------------------------------------------------------------- |
 | `config.toml` | Pipeline config, mounted into the container, holds Top-K dial |
-| `cli.py`  |   Handles RAG injestion and injection |
+| `cli.py`  |   Handles RAG ingestion and injection |
 | `docker-compose.yaml` |   Builds compose docker containers for postegres and pgvector |
-| `injest/` |    Subpackage containing resource injection modules |
+| `ingest/` |    Subpackage containing resource injection modules |
 | `store/` |    Subpackage containing the Postgres/pgvector schema and connection/query helpers |
 | `retrieve/` |    Subpackage containing top-k similarity search against the vector store |
 | `middleware/` |    Subpackage containing the harness adapter protocol and per-harness plugins |
 
-| Injest/                 | Purpose                                                              |
+| ingest/                 | Purpose                                                              |
 | -------------------- | -------------------------------------------------------------------- |
 | `loader.py` | Walks the docs/ directory and reads source files into memory |
 | `chunker.py` | Splits loaded documents into embeddable chunks |
 | `embed.py` | Calls the local Ollama embedding model on each chunk |
 | `upsert.py` | Writes chunks + embeddings into the pgvector table |
 
-| Store/                 | Purpose                                                              |
+| store/                 | Purpose                                                              |
 | -------------------- | -------------------------------------------------------------------- |
 | `schema.sql` | Postgres table + pgvector index definition (`doc_chunks`) |
-| `db.py` | Connection pool and query helpers shared by injest/retrieve |
+| `db.py` | Connection pool and query helpers shared by ingest/retrieve |
 
-| Retrieve/           |  Purpose                                                              |
+| retrieve/           |  Purpose                                                              |
 | -------------------- | -------------------------------------------------------------------- |
 | `query.py` | Embeds the user prompt and runs top-k cosine similarity search |
 
-| Middleware/                 | Purpose                                                              |
+| middleware/                 | Purpose                                                              |
 | -------------------- | -------------------------------------------------------------------- |
 | `__init__.py` | Adapter protocol every harness plugin implements |
 | `registry.py` | Maps harness name to its adapter implementation |
@@ -129,12 +135,12 @@ create index on doc_chunks using ivfflat (embedding vector_cosine_ops)
 
 ## Project Status
 
-- [] Write cli orchestrator and docker compose pieces
-- [] Build injest/ module
-- [] Build store/ module
-- [] Build retrieve/ module
-- [] Build middleware/ module
-- [] Test document injesting into vector database
-- [] Test connecting middleware adapter to an agent harness client
-- [] Adjust control dial for Top-K to test different augmented retrieval
+- [ ] Write cli orchestrator and docker compose pieces
+- [ ] Build ingest/ module
+- [ ] Build store/ module
+- [ ] Build retrieve/ module
+- [ ] Build middleware/ module
+- [ ] Test document ingesting into vector database
+- [ ] Test connecting middleware adapter to an agent harness client
+- [ ] Adjust control dial for Top-K to test different augmented retrieval
 
