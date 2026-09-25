@@ -121,9 +121,9 @@ Connect to a Agent Harness (MCP Client), such as OMP, Claude Code, or mcp-client
 
 ## Project Status
 
-- [ ] Write cli orchestrator and docker compose pieces
-- [ ] Build ingest/ module
-- [ ] Build store/ module
+- [x] Write cli orchestrator and docker compose pieces
+- [x] Build ingest/ module
+- [x] Build store/ module
 - [ ] Build retrieve/ module
 - [ ] Build middleware/ module
 - [ ] Test document ingesting into vector database
