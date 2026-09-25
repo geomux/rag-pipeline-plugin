@@ -23,16 +23,23 @@ augmented prompt --[harness client]--> model
 ## User Guide | Installation
 
 Requires Docker Engine, Docker Compose plugin, Ollama.
-GUI for viewing the PostresSQL database recommended.
+**GUI for viewing the PostresSQL database recommended.**
+Requires Python 3.11+.
 
-Install the embedding model on your machine.
-```bash
-ollama pull nomic-embed-text
-```
-
+Clone the repo and set active directory.
 ```bash
 git clone https://github.com/geomux/rag-pipeline-plugin
 cd rag-pipeline-plugin
+```
+Create a virtual environment and install dependencies.
+```bash
+python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
+python -m pip install -r requirements.txt
+```
+Install the embedding model on your machine.
+```bash
+ollama pull nomic-embed-text
 ```
 
 Copy your documents into docs/ directory.
@@ -60,27 +67,6 @@ Copy your documents into docs/ directory.
 ## User Guide | Connecting a Client (mcp-client-console)
 
 Connect to a Agent Harness (MCP Client), such as OMP, Claude Code, or mcp-client-console.
-
-
-
-## Schema
-
-```sql
-create extension if not exists vector;
-
-create table doc_chunks(
-    id              bigserial primary key,
-    source_path     text not null,
-    chunk_index     int not null,
-    content         text not null,
-    embedding       vector(768),
-    metadata        jsonb default '{}',
-    created_at      timestamptz default now()
-);
-
-create index on doc_chunks using ivfflat (embedding vector_cosine_ops)
-    with (lists =100)
-```
 
 
 ## Repo Layout
