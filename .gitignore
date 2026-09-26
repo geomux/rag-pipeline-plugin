@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local database files (bind-mounted into the postgres container)
+/data/
+/data/postgres/*
