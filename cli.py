@@ -3,15 +3,17 @@
 
 import argparse
 import os
+import psycopg
+import sys
 import tomllib
-
 from dotenv import load_dotenv
 
-# !functions from the ingest/ subpackage will import here
-# from ingest.loader import
-# from ingest.chunker import
-# from ingest.embed import
-# from ingest.upsert import
+from ingest.loader import load_docs
+from ingest.chunker import chunk_doc
+from ingest.embed import embed, embed_batch
+from ingest.upsert import upsert_chunks
+from store.db import get_connection
+
 
 # !functions from the retrieve/ subpackage will import here
 # from retrieve.query import
@@ -34,8 +36,19 @@ def main():
     model = config["embedding"]["model"]
 
     if args.command == "ingest":
-        # ingest documents logic goes here after Ingest/ subpackage ready
-        pass
+        try:
+            conn = get_connection()
+        except psycopg.OperationalError as e:
+            sys.exit(f"Could not connect to Postgres database: {e}\nIs the container running? Try: docker compose up -d")
+        with conn:
+            for doc in load_docs(args.path):
+                chunks = chunk_doc(doc, config["chunking"]["max_chars"])
+                if not chunks:
+                    continue # Skip documents with no valid chunks (i.e. empty files)
+                texts = ["search_document: " + c.text for c in chunks]
+                upsert_chunks(conn, doc.path, chunks, embed_batch(texts, model))
+                print(f"{doc.path}: ingested {len(chunks)} chunks.")
+
 
     if args.command == "retrieve":
         # query vector database embeddings with user prompt logic goes here after Retrieve/ subpackage ready

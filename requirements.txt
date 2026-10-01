@@ -2,3 +2,4 @@ ollama
 psycopg[binary]
 pgvector
 python-dotenv
+pypdf

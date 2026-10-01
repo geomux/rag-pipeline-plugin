@@ -148,7 +148,7 @@ Files marked *(planned)* do not exist yet.
 - [x] Run PostgreSQL + pgvector with Docker Compose
 - [x] `store/`: schema and connection helper
 - [x] `ingest/embed.py`: local Ollama embeddings
-- [ ] `ingest/`: loader, chunker, upsert
+- [x] `ingest/`: loader, chunker, upsert
 - [ ] Build retrieve/ module
 - [ ] Build middleware/ module
 - [ ] Add `app` service and Dockerfile to Docker Compose

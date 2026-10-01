@@ -12,3 +12,7 @@ top_k = 5
 # Ollama embedding model name
 # Change this to the desired Ollama embedding model, manifest must already be pulled locally
 model = "nomic-embed-text"
+
+[chunking]
+# Maximum number of characters per chunk
+max_chars = 2000
