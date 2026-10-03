@@ -1,6 +1,6 @@
 # rag-pipeline-plugin
 
-> **Work in progress:** not yet operational, see [Project Status](#project-status).
+> In active development: storage and local embeddings work; retrieval and harness adapters are in progress. [Project Status](#project-status).
 
 Retrieval Augmented Generation (RAG) data pipeline for ingesting documentation and serving context to an AI agent.
 
@@ -8,7 +8,7 @@ Ingest documentation into PostgreSQL with pgvector, retrieve the chunks with the
 
 Once integrated into your agent harness, every user prompt that calls a model will use RAG.
 
-**Requirements:** Python 3.11 · PostgreSQL 16 + pgvector · Ollama (`nomic-embed-text`, local) · Docker Compose
+**Requirements:** Python 3.11+ · PostgreSQL 16 + pgvector · Ollama (`nomic-embed-text`, local) · Docker Compose
 
 ```mermaid
 flowchart LR
@@ -22,11 +22,14 @@ flowchart LR
 
 ## Design
 
-- **Always inject.** Every prompt gets retrieval. There is no model-side MCP tool call for when to look things up.
-- **Tune with `config.toml`.** Top-k and the embedding model are adjustable without rebuilding anything.
+- **Always inject.** Every prompt gets retrieval. There is no model-side MCP tool call for when to look things up. This design was selected for simplicity in this prototype, but may be modified to allow for agentic RAG as an option.
+- **Tune with `config.toml`.** Top-k is adjustable in `config.toml` without rebuilding.Changing the embedding model requires a schema change and re-ingest.
 - **Local embeddings.** Ollama runs `nomic-embed-text` (768-dimension vectors), so no documents/chunks leave the machine.
 - **"Header-Aware" chunking** instead of fixed chunk sizes, chunks follow the document's own sections. *(planned)*
 - **Middleware as a plugin registry.** Each harness gets an adapter in `middleware/adapters/`.
+- **Schema** The postgres table schema is applied when the connection is established with database.
+- **Citations** Each retrieved chunk carries its source file and section, so answers can cite where they came from. *(planned)*
+- **Evals** A set of known "question-and-source" pairs to measure retrieval accuracy before tuning top-k. **(planned)**
 
 
 ## User Guide | Installation
@@ -112,10 +115,10 @@ Files marked *(planned)* do not exist yet.
 
 | ingest/ | Purpose |
 | ------- | ------- |
-| `loader.py` | Walks the docs/ directory and reads source files into memory *(planned)* |
-| `chunker.py` | Splits loaded documents into embeddable chunks *(planned)* |
+| `loader.py` | Walks the docs/ directory and reads source files into memory |
+| `chunker.py` | Splits loaded documents into embeddable chunks |
 | `embed.py` | Calls the local Ollama embedding model on each chunk |
-| `upsert.py` | Writes chunks + embeddings into the pgvector table *(planned)* |
+| `upsert.py` | Writes chunks + embeddings into the pgvector table |
 
 | store/ | Purpose |
 | ------ | ------- |
@@ -130,7 +133,7 @@ Files marked *(planned)* do not exist yet.
 | ----------- | ------- |
 | `__init__.py` | Adapter protocol every harness plugin implements *(planned)* |
 | `registry.py` | Maps harness name to its adapter implementation *(planned)* |
-| `adapters/omp.py` | Adapter for the OMP agent harness *(planned)* |
+| `adapters/omp.py` | Adapter for the Oh My Pi (OMP) agent harness *(planned)* |
 | `adapters/claude_code.py` | Adapter for Claude Code *(planned)* |
 | `adapters/custom_cli.py` | Adapter for a custom/personal harness *(planned)* |
 
